@@ -11,7 +11,7 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 
-from .auth_views import MyTokenObtainPairView, RegisterView, UserDetailView, LogoutView, DemoTokenView
+from .auth_views import MyTokenObtainPairView, RegisterView, UserDetailView, LogoutView, DemoTokenView, VerifyEmailView
 
 # Configuration de la documentation API avec Swagger
 schema_view = get_schema_view(
@@ -36,6 +36,7 @@ urlpatterns = [
     path('api/auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/auth/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
     path('api/auth/register/', RegisterView.as_view(), name='auth_register'),
+    path('api/auth/verify-email/', VerifyEmailView.as_view(), name='verify_email'),
     path('api/auth/user/', UserDetailView.as_view(), name='auth_user_detail'),
     path('api/auth/logout/', LogoutView.as_view(), name='auth_logout'),
     path('api/token/blacklist/', TokenBlacklistView.as_view(), name='token_blacklist'),

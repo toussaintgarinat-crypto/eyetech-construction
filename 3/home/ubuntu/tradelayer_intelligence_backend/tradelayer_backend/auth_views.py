@@ -5,6 +5,9 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from django.contrib.auth.models import User
+from django.core import signing
+from django.http import HttpResponseRedirect
+from django.conf import settings
 from .token_serializers import MyTokenObtainPairSerializer, RegisterSerializer, UserSerializer
 from .throttles import AuthRateThrottle, DemoTokenThrottle
 import os
@@ -14,6 +17,34 @@ class MyTokenObtainPairView(TokenObtainPairView):
     """Login avec rate limiting : 5 tentatives/minute par IP."""
     serializer_class = MyTokenObtainPairSerializer
     throttle_classes = [AuthRateThrottle]
+
+    def post(self, request, *args, **kwargs):
+        username = request.data.get('username', '')
+        try:
+            user = User.objects.get(username=username)
+            if not user.is_active:
+                return Response(
+                    {"detail": "Votre email n'a pas encore été vérifié. Consultez votre boîte mail et cliquez sur le lien d'activation."},
+                    status=status.HTTP_401_UNAUTHORIZED
+                )
+        except User.DoesNotExist:
+            pass
+        return super().post(request, *args, **kwargs)
+
+
+class VerifyEmailView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        token = request.query_params.get('token', '')
+        try:
+            data = signing.loads(token, salt='tradelayer-email-verification', max_age=86400)
+            user = User.objects.get(pk=data['user_id'])
+            user.is_active = True
+            user.save()
+            return HttpResponseRedirect(f"{settings.FRONTEND_URL}?verified=true")
+        except Exception:
+            return HttpResponseRedirect(f"{settings.FRONTEND_URL}?verified=false")
 
 
 class DemoTokenView(APIView):
