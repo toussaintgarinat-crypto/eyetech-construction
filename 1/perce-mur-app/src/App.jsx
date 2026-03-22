@@ -64,6 +64,9 @@ function App() {
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [registerSuccess, setRegisterSuccess] = useState('');
+  const [loginSuccess, setLoginSuccess] = useState('');
   const [loginError, setLoginError] = useState('');
   const [registerError, setRegisterError] = useState('');
   const [drillingPoints, setDrillingPoints] = useState([]);
@@ -72,6 +75,17 @@ function App() {
   const printPlanInputRef = useRef(null);
 
   const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('verified') === 'true') {
+      setLoginSuccess('✓ Email vérifié ! Vous pouvez maintenant vous connecter.');
+      window.history.replaceState({}, '', '/');
+    } else if (params.get('verified') === 'false') {
+      setLoginError("Lien de vérification invalide ou expiré. Réinscrivez-vous.");
+      window.history.replaceState({}, '', '/');
+    }
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
@@ -136,16 +150,31 @@ function App() {
     }
   };
   const handleRegister = async () => {
+    setRegisterError('');
+    setRegisterSuccess('');
+    if (!email || !password || !confirmPassword) {
+      setRegisterError('Tous les champs sont obligatoires.');
+      return;
+    }
+    if (password !== confirmPassword) {
+      setRegisterError('Les mots de passe ne correspondent pas.');
+      return;
+    }
+    if (password.length < 8) {
+      setRegisterError('Le mot de passe doit contenir au moins 8 caractères.');
+      return;
+    }
     try {
-      setRegisterError('');
-      await registerUser({ username, email, password });
-      setIsRegistering(false);
-      alert('Inscription réussie ! Veuillez vous connecter.');
+      await registerUser({ username: email, email, password });
+      setRegisterSuccess(`Un email de confirmation a été envoyé à ${email}. Cliquez sur le lien pour activer votre compte.`);
+      setEmail('');
+      setPassword('');
+      setConfirmPassword('');
     } catch (error) {
       console.error("Erreur d'inscription:", error);
       if (error.response && error.response.data) {
         const errorMessages = Object.values(error.response.data).flat().join(' ');
-        setRegisterError(`Erreur d'inscription: ${errorMessages}`);
+        setRegisterError(`Erreur : ${errorMessages}`);
       } else {
         setRegisterError("Erreur lors de l'inscription. Veuillez réessayer.");
       }
@@ -427,20 +456,12 @@ function App() {
           </CardHeader>
           <CardContent className="space-y-4">
             <input
-              type="text"
-              placeholder="Email"              className="w-full p-2 rounded bg-slate-700 border border-slate-600 text-white placeholder-slate-400"
+              type="email"
+              placeholder="Adresse email"
+              className="w-full p-2 rounded bg-slate-700 border border-slate-600 text-white placeholder-slate-400"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
-            {isRegistering && (
-              <input
-                type="email"
-                placeholder="Email"
-                className="w-full p-2 rounded bg-slate-700 border border-slate-600 text-white placeholder-slate-400"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            )}
             <input
               type="password"
               placeholder="Mot de passe"
@@ -448,12 +469,45 @@ function App() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
+            {isRegistering && (
+              <input
+                type="password"
+                placeholder="Confirmer le mot de passe"
+                className="w-full p-2 rounded bg-slate-700 border border-slate-600 text-white placeholder-slate-400"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+            )}
             {loginError && <p className="text-red-500 text-sm text-center">{loginError}</p>}
             {registerError && <p className="text-red-500 text-sm text-center">{registerError}</p>}
-            <Button onClick={isRegistering ? handleRegister : handleLogin} className="w-full">
-              {isRegistering ? "S'inscrire" : 'Se connecter'}
-            </Button>
-            <Button onClick={() => setIsRegistering(!isRegistering)} variant="link" className="w-full text-slate-400">
+            {loginSuccess && (
+              <p className="text-green-400 text-sm text-center bg-green-900/30 p-3 rounded border border-green-700">
+                {loginSuccess}
+              </p>
+            )}
+            {registerSuccess ? (
+              <p className="text-green-400 text-sm text-center bg-green-900/30 p-3 rounded border border-green-700">
+                ✓ {registerSuccess}
+              </p>
+            ) : (
+              <Button onClick={isRegistering ? handleRegister : handleLogin} className="w-full">
+                {isRegistering ? "S'inscrire" : 'Se connecter'}
+              </Button>
+            )}
+            <Button
+              onClick={() => {
+                setIsRegistering(!isRegistering);
+                setLoginError('');
+                setLoginSuccess('');
+                setRegisterError('');
+                setRegisterSuccess('');
+                setEmail('');
+                setPassword('');
+                setConfirmPassword('');
+              }}
+              variant="link"
+              className="w-full text-slate-400"
+            >
               {isRegistering ? 'Déjà un compte ? Connectez-vous' : 'Pas de compte ? Inscrivez-vous'}
             </Button>
           </CardContent>

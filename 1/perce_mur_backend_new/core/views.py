@@ -1,6 +1,32 @@
 from rest_framework import viewsets, permissions, serializers
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.http import HttpResponseRedirect
+from django.conf import settings
+from django.contrib.auth import get_user_model
 from .models import User, Project, DrillingPoint, ARMeasurement, Photo, PrintPlan
 from .serializers import UserSerializer, ProjectSerializer, DrillingPointSerializer, ARMeasurementSerializer, PhotoSerializer, PrintPlanSerializer
+
+User = get_user_model()
+
+
+class VerifyEmailView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        token = request.query_params.get('token')
+        if not token:
+            return HttpResponseRedirect(f"{settings.FRONTEND_URL}?verified=false&error=missing_token")
+        try:
+            user = User.objects.get(email_verification_token=token)
+            user.is_email_verified = True
+            user.email_verification_token = None
+            user.save()
+            return HttpResponseRedirect(f"{settings.FRONTEND_URL}?verified=true")
+        except User.DoesNotExist:
+            return HttpResponseRedirect(f"{settings.FRONTEND_URL}?verified=false&error=invalid_token")
+
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()

@@ -57,6 +57,7 @@ class DemoTokenView(APIView):
                 password=password,
                 first_name='Demo',
                 last_name='Eyetech',
+                is_email_verified=True,
             )
         token = AccessToken.for_user(user)
         token['is_demo'] = True
