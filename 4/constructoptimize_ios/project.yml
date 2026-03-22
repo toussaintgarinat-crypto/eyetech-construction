@@ -1,0 +1,30 @@
+name: ConstructOptimize
+options:
+  bundleIdPrefix: fr.eyetech
+  deploymentTarget:
+    iOS: "17.0"
+  xcodeVersion: "16.3"
+targets:
+  ConstructOptimize:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: ConstructOptimize
+    info:
+      path: ConstructOptimize/Info.plist
+      properties:
+        CFBundleName: ConstructOptimize
+        CFBundleDisplayName: ConstructOptimize
+        CFBundleShortVersionString: "1.0"
+        CFBundleVersion: "1"
+        UILaunchScreen: {}
+        NSAppTransportSecurity:
+          NSAllowsArbitraryLoads: true
+        NSLocationWhenInUseUsageDescription: "Pour trouver les fournisseurs proches de votre chantier"
+        NSLocationAlwaysUsageDescription: "Pour calculer les distances avec les fournisseurs"
+    settings:
+      base:
+        SWIFT_VERSION: "5.9"
+        PRODUCT_BUNDLE_IDENTIFIER: fr.eyetech.constructoptimize
+        DEVELOPMENT_TEAM: ""

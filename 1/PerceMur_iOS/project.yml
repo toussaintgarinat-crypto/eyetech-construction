@@ -1,0 +1,36 @@
+name: PerceMur
+options:
+  bundleIdPrefix: com.eyetech
+  deploymentTarget:
+    iOS: "16.0"
+  xcodeVersion: "15"
+
+targets:
+  PerceMur:
+    type: application
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - Sources/PerceMur
+    info:
+      path: Sources/PerceMur/Info.plist
+      properties:
+        CFBundleDisplayName: Perce-Mur
+        CFBundleShortVersionString: "1.0"
+        CFBundleVersion: "1"
+        UILaunchStoryboardName: ""
+        NSCameraUsageDescription: "Perce-Mur utilise la caméra pour la réalité augmentée et la détection LiDAR des obstacles."
+        NSPhotoLibraryUsageDescription: "Perce-Mur peut accéder à vos photos pour les projets."
+        UIRequiredDeviceCapabilities:
+          - arkit
+        UIStatusBarHidden: false
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.eyetech.percemur
+      SWIFT_VERSION: "5.9"
+      INFOPLIST_FILE: Sources/PerceMur/Info.plist
+    entitlements:
+      path: Sources/PerceMur/PerceMur.entitlements

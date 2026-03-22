@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Permissions pour ARCore -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera.ar" android:required="true" />
+    <uses-feature android:name="android.hardware.camera" android:required="true" />
+    
+    <!-- Permissions pour les commandes vocales -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    
+    <!-- Permissions réseau -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    
+    <!-- Permissions de localisation pour l'analyse spatiale -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    
+    <!-- Stockage pour les modèles 3D -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" 
+        android:maxSdkVersion="28" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" 
+        android:maxSdkVersion="32" />
+
+    <application
+        android:name=".TradelayerApplication"
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.TradelayerIntelligence"
+        tools:targetApi="31">
+        
+        <!-- Métadonnées ARCore -->
+        <meta-data android:name="com.google.ar.core" android:value="required" />
+        
+        <!-- Activité principale -->
+        <activity
+            android:name=".ui.MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.TradelayerIntelligence"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        
+        <!-- Activité AR -->
+        <activity
+            android:name=".ui.ar.ARActivity"
+            android:exported="false"
+            android:label="@string/ar_activity_title"
+            android:theme="@style/Theme.TradelayerIntelligence.NoActionBar"
+            android:screenOrientation="portrait" />
+        
+        <!-- Service pour les commandes vocales -->
+        <service
+            android:name=".voice.VoiceCommandService"
+            android:exported="false" />
+            
+    </application>
+
+</manifest>
