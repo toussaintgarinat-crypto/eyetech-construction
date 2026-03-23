@@ -40,20 +40,25 @@ class RegisterSerializer(serializers.ModelSerializer):
         from django.core import signing
         from django.core.mail import send_mail
         from django.conf import settings
-        email_configured = bool(os.getenv('EMAIL_HOST_USER', ''))
+        smtp_ready = all([
+            os.getenv('EMAIL_HOST_USER', ''),
+            os.getenv('EMAIL_HOST_PASSWORD', ''),
+            os.getenv('EMAIL_HOST', ''),
+        ])
         user = User.objects.create_user(
             username=validated_data['username'],
             email=validated_data['email'],
             first_name=validated_data['first_name'],
             last_name=validated_data['last_name'],
-            is_active=True if not email_configured else False,
+            is_active=True,
         )
         user.set_password(validated_data['password'])
         user.save()
-        if email_configured:
-            token = signing.dumps({'user_id': user.pk}, salt='tradelayer-email-verification')
-            verify_url = f"{settings.BACKEND_URL}/api/auth/verify-email/?token={token}"
-            send_mail(
+        if smtp_ready:
+            try:
+              token = signing.dumps({'user_id': user.pk}, salt='tradelayer-email-verification')
+              verify_url = f"{settings.BACKEND_URL}/api/auth/verify-email/?token={token}"
+              send_mail(
                 subject="Vérifiez votre email — TradeLayer Intelligence",
                 message=(
                     f"Bonjour {user.first_name or user.username},\n\n"
@@ -66,5 +71,7 @@ class RegisterSerializer(serializers.ModelSerializer):
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[user.email],
                 fail_silently=True,
-            )
+              )
+            except Exception:
+                pass
         return user

@@ -23,32 +23,39 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         import os
-        # En dev local (pas de config SMTP), on vérifie automatiquement l'email
-        email_configured = bool(os.getenv('EMAIL_HOST_USER', ''))
-        token = uuid.uuid4() if email_configured else None
+        # SMTP complet = host + user + password tous définis
+        smtp_ready = all([
+            os.getenv('EMAIL_HOST_USER', ''),
+            os.getenv('EMAIL_HOST_PASSWORD', ''),
+            os.getenv('EMAIL_HOST', ''),
+        ])
+        token = uuid.uuid4() if smtp_ready else None
         user = User.objects.create_user(
             username=validated_data.get("username", validated_data["email"]),
             email=validated_data["email"],
             password=validated_data["password"],
-            is_email_verified=not email_configured,
+            is_email_verified=True,  # toujours actif — email de confirmation si SMTP dispo
             email_verification_token=token,
         )
-        if email_configured:
-            verify_url = f"{settings.BACKEND_URL}/api/verify-email/?token={token}"
-            send_mail(
-                subject="Vérifiez votre email — Perce-Mur",
-                message=(
-                    f"Bonjour,\n\n"
-                    f"Merci pour votre inscription sur Perce-Mur.\n\n"
-                    f"Cliquez sur le lien ci-dessous pour activer votre compte :\n\n"
-                    f"{verify_url}\n\n"
-                    f"Ce lien est valable 24 heures.\n\n"
-                    f"L'équipe Eyetech Construction"
-                ),
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[user.email],
-                fail_silently=True,
-            )
+        if smtp_ready:
+            try:
+                verify_url = f"{settings.BACKEND_URL}/api/verify-email/?token={token}"
+                send_mail(
+                    subject="Vérifiez votre email — Perce-Mur",
+                    message=(
+                        f"Bonjour,\n\n"
+                        f"Merci pour votre inscription sur Perce-Mur.\n\n"
+                        f"Cliquez sur le lien ci-dessous pour activer votre compte :\n\n"
+                        f"{verify_url}\n\n"
+                        f"Ce lien est valable 24 heures.\n\n"
+                        f"L'équipe Eyetech Construction"
+                    ),
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[user.email],
+                    fail_silently=True,
+                )
+            except Exception:
+                pass
         return user
 
 

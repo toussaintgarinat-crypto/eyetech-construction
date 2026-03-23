@@ -70,34 +70,37 @@ def register_view(request):
         return Response({'erreur': 'Un compte existe déjà avec cet email.'}, status=status.HTTP_400_BAD_REQUEST)
 
     import os
-    email_configured = bool(os.getenv('EMAIL_HOST_USER', ''))
+    smtp_ready = all([os.getenv('EMAIL_HOST_USER',''), os.getenv('EMAIL_HOST_PASSWORD',''), os.getenv('EMAIL_HOST','')])
     user = User.objects.create_user(
         username=data['username'],
         email=data['email'],
         password=data['password'],
         first_name=data.get('first_name', ''),
         last_name=data.get('last_name', ''),
-        is_active=True if not email_configured else False,
+        is_active=True,
     )
-    if email_configured:
-        token = signing.dumps({'user_id': user.pk}, salt='buildingscan-email-verification')
-        verify_url = f"{settings.BACKEND_URL}/api/auth/verify-email/?token={token}"
-        send_mail(
-            subject="Vérifiez votre email — BuildingScan",
-            message=(
-                f"Bonjour {user.first_name or user.username},\n\n"
-                f"Merci pour votre inscription sur BuildingScan.\n\n"
-                f"Cliquez sur le lien ci-dessous pour activer votre compte :\n\n"
-                f"{verify_url}\n\n"
-                f"Ce lien est valable 24 heures.\n\n"
-                f"L'équipe Eyetech Construction"
-            ),
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
-            fail_silently=True,
-        )
+    if smtp_ready:
+        try:
+            token = signing.dumps({'user_id': user.pk}, salt='buildingscan-email-verification')
+            verify_url = f"{settings.BACKEND_URL}/api/auth/verify-email/?token={token}"
+            send_mail(
+                subject="Vérifiez votre email — BuildingScan",
+                message=(
+                    f"Bonjour {user.first_name or user.username},\n\n"
+                    f"Merci pour votre inscription sur BuildingScan.\n\n"
+                    f"Cliquez sur le lien ci-dessous pour activer votre compte :\n\n"
+                    f"{verify_url}\n\n"
+                    f"Ce lien est valable 24 heures.\n\n"
+                    f"L'équipe Eyetech Construction"
+                ),
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email],
+                fail_silently=True,
+            )
+        except Exception:
+            pass
     return Response({
-        'message': 'Compte créé. Vous pouvez maintenant vous connecter.' if not email_configured else 'Compte créé. Un email de confirmation a été envoyé à votre adresse.',
+        'message': 'Compte créé. Vous pouvez maintenant vous connecter.',
         'email': user.email,
     }, status=status.HTTP_201_CREATED)
 
