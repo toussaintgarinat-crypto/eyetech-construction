@@ -238,6 +238,6 @@ LOGGING = {
         'commandes_vocales': {'handlers': ['console'], 'level': 'DEBUG', 'propagate': False},
         'analyse_spatiale': {'handlers': ['console'], 'level': 'DEBUG', 'propagate': False},
         'rag_metiers': {'handlers': ['console'], 'level': 'DEBUG', 'propagate': False},
-        'api.access': {'handlers': ['file', 'console'], 'level': 'INFO', 'propagate': False},
+        'api.access': {'handlers': ['console'], 'level': 'INFO', 'propagate': False},
     },
 }

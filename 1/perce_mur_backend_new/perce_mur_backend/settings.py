@@ -247,7 +247,7 @@ LOGGING = {
             'propagate': False,
         },
         'api.access': {
-            'handlers': ['file', 'console'],
+            'handlers': ['console'],
             'level': 'INFO',
             'propagate': False,
         },

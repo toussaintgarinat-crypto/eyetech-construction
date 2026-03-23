@@ -272,6 +272,6 @@ LOGGING = {
         'comparateur_prix': {'handlers': ['console'], 'level': 'DEBUG', 'propagate': False},
         'fournisseurs': {'handlers': ['console'], 'level': 'DEBUG', 'propagate': False},
         'produits': {'handlers': ['console'], 'level': 'DEBUG', 'propagate': False},
-        'api.access': {'handlers': ['file', 'console'], 'level': 'INFO', 'propagate': False},
+        'api.access': {'handlers': ['console'], 'level': 'INFO', 'propagate': False},
     },
 }
