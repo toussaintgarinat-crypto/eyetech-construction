@@ -93,6 +93,35 @@ export default function NavBar() {
         ))}
       </div>
 
+      {/* Suite Eyetech */}
+      <div style={styles.navSection}>Suite Eyetech</div>
+      <div style={{ padding: '0 14px 12px', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+        {[
+          { label: 'Perce-Mur', short: 'PM', color: '#f97316', port: 5173 },
+          { label: 'BuildingScan', short: 'BS', color: '#7c3aed', port: 5172 },
+          { label: 'TradeLayer', short: 'TL', color: '#3b82f6', port: 5174, current: true },
+          { label: 'ConstructOpt.', short: 'CO', color: '#10b981', port: 5175 },
+        ].map(app => (
+          <a
+            key={app.label}
+            href={`http://localhost:${app.port}`}
+            title={app.label}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '5px',
+              padding: '4px 8px', borderRadius: '6px',
+              background: app.current ? 'rgba(59,130,246,0.15)' : 'transparent',
+              border: `1px solid ${app.current ? '#3b82f6' : '#334155'}`,
+              textDecoration: 'none', fontSize: '11px',
+              color: app.current ? '#3b82f6' : '#64748b',
+              fontWeight: app.current ? 700 : 400,
+            }}
+          >
+            <div style={{ width: 6, height: 6, borderRadius: '50%', background: app.color, flexShrink: 0 }} />
+            {app.short}
+          </a>
+        ))}
+      </div>
+
       {/* User block at bottom */}
       <div style={styles.userBlock}>
         <div style={styles.userInfo}>

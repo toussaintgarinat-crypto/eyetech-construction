@@ -44,29 +44,31 @@ def register_view(request):
         return Response({'erreur': 'Ce nom d\'utilisateur est déjà pris.'}, status=status.HTTP_400_BAD_REQUEST)
     if User.objects.filter(email=data['email']).exists():
         return Response({'erreur': 'Un compte existe déjà avec cet email.'}, status=status.HTTP_400_BAD_REQUEST)
+    email_configured = bool(os.getenv('EMAIL_HOST_USER', ''))
     user = User.objects.create_user(
         username=data['username'],
         email=data['email'],
         password=data['password'],
-        is_active=False,
+        is_active=True if not email_configured else False,
     )
-    token = signing.dumps({'user_id': user.pk}, salt='constructoptimize-email-verification')
-    verify_url = f"{settings.BACKEND_URL}/api/auth/verify-email/?token={token}"
-    send_mail(
-        subject="Vérifiez votre email — ConstructOptimize",
-        message=(
-            f"Bonjour {user.username},\n\n"
-            f"Merci pour votre inscription sur ConstructOptimize.\n\n"
-            f"Cliquez sur le lien ci-dessous pour activer votre compte :\n\n"
-            f"{verify_url}\n\n"
-            f"Ce lien est valable 24 heures.\n\n"
-            f"L'équipe Eyetech Construction"
-        ),
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        recipient_list=[user.email],
-        fail_silently=True,
-    )
-    return Response({'message': 'Compte créé. Un email de confirmation a été envoyé à votre adresse.'}, status=status.HTTP_201_CREATED)
+    if email_configured:
+        token = signing.dumps({'user_id': user.pk}, salt='constructoptimize-email-verification')
+        verify_url = f"{settings.BACKEND_URL}/api/auth/verify-email/?token={token}"
+        send_mail(
+            subject="Vérifiez votre email — ConstructOptimize",
+            message=(
+                f"Bonjour {user.username},\n\n"
+                f"Merci pour votre inscription sur ConstructOptimize.\n\n"
+                f"Cliquez sur le lien ci-dessous pour activer votre compte :\n\n"
+                f"{verify_url}\n\n"
+                f"Ce lien est valable 24 heures.\n\n"
+                f"L'équipe Eyetech Construction"
+            ),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            fail_silently=True,
+        )
+    return Response({'message': 'Compte créé. Vous pouvez maintenant vous connecter.' if not email_configured else 'Compte créé. Un email de confirmation a été envoyé à votre adresse.'}, status=status.HTTP_201_CREATED)
 
 
 @api_view(['GET'])
@@ -137,7 +139,19 @@ schema_view = get_schema_view(
     permission_classes=[permissions.AllowAny],
 )
 
+
+from rest_framework.decorators import api_view
+from rest_framework.permissions import AllowAny
+from rest_framework.decorators import permission_classes as dpc3
+from rest_framework.response import Response as HealthResponse
+
+@api_view(["GET"])
+@dpc3([AllowAny])
+def health_check(request):
+    return HealthResponse({"status": "ok", "app": "constructoptimize"})
+
 urlpatterns = [
+    path("health/", health_check, name="health"),
     path('admin/', admin.site.urls),
     path('api/token/', ThrottledTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),

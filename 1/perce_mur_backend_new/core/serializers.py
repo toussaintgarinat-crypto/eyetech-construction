@@ -22,29 +22,33 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data):
-        token = uuid.uuid4()
+        import os
+        # En dev local (pas de config SMTP), on vérifie automatiquement l'email
+        email_configured = bool(os.getenv('EMAIL_HOST_USER', ''))
+        token = uuid.uuid4() if email_configured else None
         user = User.objects.create_user(
             username=validated_data.get("username", validated_data["email"]),
             email=validated_data["email"],
             password=validated_data["password"],
-            is_email_verified=False,
+            is_email_verified=not email_configured,
             email_verification_token=token,
         )
-        verify_url = f"{settings.BACKEND_URL}/api/verify-email/?token={token}"
-        send_mail(
-            subject="Vérifiez votre email — Perce-Mur",
-            message=(
-                f"Bonjour,\n\n"
-                f"Merci pour votre inscription sur Perce-Mur.\n\n"
-                f"Cliquez sur le lien ci-dessous pour activer votre compte :\n\n"
-                f"{verify_url}\n\n"
-                f"Ce lien est valable 24 heures.\n\n"
-                f"L'équipe Eyetech Construction"
-            ),
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
-            fail_silently=True,
-        )
+        if email_configured:
+            verify_url = f"{settings.BACKEND_URL}/api/verify-email/?token={token}"
+            send_mail(
+                subject="Vérifiez votre email — Perce-Mur",
+                message=(
+                    f"Bonjour,\n\n"
+                    f"Merci pour votre inscription sur Perce-Mur.\n\n"
+                    f"Cliquez sur le lien ci-dessous pour activer votre compte :\n\n"
+                    f"{verify_url}\n\n"
+                    f"Ce lien est valable 24 heures.\n\n"
+                    f"L'équipe Eyetech Construction"
+                ),
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email],
+                fail_silently=True,
+            )
         return user
 
 

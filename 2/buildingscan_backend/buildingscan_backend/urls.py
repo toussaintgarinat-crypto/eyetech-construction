@@ -69,32 +69,35 @@ def register_view(request):
     if User.objects.filter(email=data['email']).exists():
         return Response({'erreur': 'Un compte existe déjà avec cet email.'}, status=status.HTTP_400_BAD_REQUEST)
 
+    import os
+    email_configured = bool(os.getenv('EMAIL_HOST_USER', ''))
     user = User.objects.create_user(
         username=data['username'],
         email=data['email'],
         password=data['password'],
         first_name=data.get('first_name', ''),
         last_name=data.get('last_name', ''),
-        is_active=False,
+        is_active=True if not email_configured else False,
     )
-    token = signing.dumps({'user_id': user.pk}, salt='buildingscan-email-verification')
-    verify_url = f"{settings.BACKEND_URL}/api/auth/verify-email/?token={token}"
-    send_mail(
-        subject="Vérifiez votre email — BuildingScan",
-        message=(
-            f"Bonjour {user.first_name or user.username},\n\n"
-            f"Merci pour votre inscription sur BuildingScan.\n\n"
-            f"Cliquez sur le lien ci-dessous pour activer votre compte :\n\n"
-            f"{verify_url}\n\n"
-            f"Ce lien est valable 24 heures.\n\n"
-            f"L'équipe Eyetech Construction"
-        ),
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        recipient_list=[user.email],
-        fail_silently=True,
-    )
+    if email_configured:
+        token = signing.dumps({'user_id': user.pk}, salt='buildingscan-email-verification')
+        verify_url = f"{settings.BACKEND_URL}/api/auth/verify-email/?token={token}"
+        send_mail(
+            subject="Vérifiez votre email — BuildingScan",
+            message=(
+                f"Bonjour {user.first_name or user.username},\n\n"
+                f"Merci pour votre inscription sur BuildingScan.\n\n"
+                f"Cliquez sur le lien ci-dessous pour activer votre compte :\n\n"
+                f"{verify_url}\n\n"
+                f"Ce lien est valable 24 heures.\n\n"
+                f"L'équipe Eyetech Construction"
+            ),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            fail_silently=True,
+        )
     return Response({
-        'message': 'Compte créé. Un email de confirmation a été envoyé à votre adresse.',
+        'message': 'Compte créé. Vous pouvez maintenant vous connecter.' if not email_configured else 'Compte créé. Un email de confirmation a été envoyé à votre adresse.',
         'email': user.email,
     }, status=status.HTTP_201_CREATED)
 
@@ -143,9 +146,16 @@ class BuildingScanTokenView(TokenObtainPairView):
         return super().post(request, *args, **kwargs)
 
 
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def health_check(request):
+    return Response({"status": "ok", "app": "buildingscan"})
+
 # --- URL Patterns ---
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('health/', health_check, name='health'),
 
     # Auth JWT
     path('api/token/', BuildingScanTokenView.as_view(), name='token_obtain_pair'),

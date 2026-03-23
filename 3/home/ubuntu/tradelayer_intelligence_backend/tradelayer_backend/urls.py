@@ -27,7 +27,19 @@ schema_view = get_schema_view(
     permission_classes=(permissions.AllowAny,),
 )
 
+
+from rest_framework.decorators import api_view
+from rest_framework.permissions import AllowAny
+from rest_framework.decorators import permission_classes as dpc2
+from rest_framework.response import Response as HealthResponse
+
+@api_view(["GET"])
+@dpc2([AllowAny])
+def health_check(request):
+    return HealthResponse({"status": "ok", "app": "tradelayer"})
+
 urlpatterns = [
+    path("health/", health_check, name="health"),
     # Administration Django
     path('admin/', admin.site.urls),
 

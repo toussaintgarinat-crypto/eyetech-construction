@@ -166,7 +166,8 @@ function App() {
     }
     try {
       await registerUser({ username: email, email, password });
-      setRegisterSuccess(`Un email de confirmation a été envoyé à ${email}. Cliquez sur le lien pour activer votre compte.`);
+      setRegisterSuccess(`Compte créé avec succès ! Vous pouvez maintenant vous connecter.`);
+      setIsRegistering(false);
       setEmail('');
       setPassword('');
       setConfirmPassword('');
@@ -441,60 +442,93 @@ function App() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white flex items-center justify-center">
-        <Card className="bg-slate-800/50 border-slate-700 p-8 w-96">
-          <CardHeader className="text-center">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <Target className="w-10 h-10 text-blue-400" />
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                PERCE-MUR
-              </h1>
+      <div style={loginStyles.root}>
+        <div style={loginStyles.card}>
+          <div style={loginStyles.brandBlock}>
+            <div style={loginStyles.logoCircle}>
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                <rect width="32" height="32" rx="8" fill="#f97316" />
+                <circle cx="16" cy="16" r="7" stroke="white" strokeWidth="2" fill="none" />
+                <line x1="16" y1="4" x2="16" y2="9" stroke="white" strokeWidth="2" strokeLinecap="round" />
+                <line x1="16" y1="23" x2="16" y2="28" stroke="white" strokeWidth="2" strokeLinecap="round" />
+                <line x1="4" y1="16" x2="9" y2="16" stroke="white" strokeWidth="2" strokeLinecap="round" />
+                <line x1="23" y1="16" x2="28" y2="16" stroke="white" strokeWidth="2" strokeLinecap="round" />
+                <circle cx="16" cy="16" r="2.5" fill="white" />
+              </svg>
             </div>
-            <CardDescription className="text-slate-400">
-              {isRegistering ? 'Créez votre compte' : 'Connectez-vous à votre compte'}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <input
-              type="email"
-              placeholder="Adresse email"
-              className="w-full p-2 rounded bg-slate-700 border border-slate-600 text-white placeholder-slate-400"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <input
-              type="password"
-              placeholder="Mot de passe"
-              className="w-full p-2 rounded bg-slate-700 border border-slate-600 text-white placeholder-slate-400"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            {isRegistering && (
-              <input
-                type="password"
-                placeholder="Confirmer le mot de passe"
-                className="w-full p-2 rounded bg-slate-700 border border-slate-600 text-white placeholder-slate-400"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-              />
+            <div>
+              <h1 style={loginStyles.brandName}>Perce-Mur AR</h1>
+              <p style={loginStyles.brandSub}>Eyetech Construction — Perçage guidé par AR</p>
+            </div>
+          </div>
+
+          <div style={loginStyles.formBlock}>
+            <h2 style={loginStyles.title}>{isRegistering ? 'Créer un compte' : 'Connexion'}</h2>
+            <p style={loginStyles.subtitle}>
+              {isRegistering ? 'Rejoignez la plateforme Perce-Mur' : 'Accédez à votre espace opérateur AR'}
+            </p>
+
+            {loginSuccess && !isRegistering && (
+              <div style={loginStyles.successBox}>{loginSuccess}</div>
             )}
-            {loginError && <p className="text-red-500 text-sm text-center">{loginError}</p>}
-            {registerError && <p className="text-red-500 text-sm text-center">{registerError}</p>}
-            {loginSuccess && (
-              <p className="text-green-400 text-sm text-center bg-green-900/30 p-3 rounded border border-green-700">
-                {loginSuccess}
-              </p>
+            {(loginError || registerError) && (
+              <div style={loginStyles.errorBox}>
+                <span style={{ marginRight: 8 }}>⚠</span>
+                {loginError || registerError}
+              </div>
             )}
-            {registerSuccess ? (
-              <p className="text-green-400 text-sm text-center bg-green-900/30 p-3 rounded border border-green-700">
-                ✓ {registerSuccess}
-              </p>
-            ) : (
-              <Button onClick={isRegistering ? handleRegister : handleLogin} className="w-full">
-                {isRegistering ? "S'inscrire" : 'Se connecter'}
-              </Button>
+            {registerSuccess && <div style={loginStyles.successBox}>✓ {registerSuccess}</div>}
+
+            {!registerSuccess && (
+              <form
+                onSubmit={e => { e.preventDefault(); isRegistering ? handleRegister() : handleLogin(); }}
+                style={loginStyles.form}
+              >
+                <div style={loginStyles.fieldGroup}>
+                  <label style={loginStyles.label}>Adresse email</label>
+                  <input
+                    type="email"
+                    autoComplete="email"
+                    placeholder="vous@exemple.com"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    style={loginStyles.input}
+                    required
+                  />
+                </div>
+                <div style={loginStyles.fieldGroup}>
+                  <label style={loginStyles.label}>Mot de passe</label>
+                  <input
+                    type="password"
+                    autoComplete={isRegistering ? 'new-password' : 'current-password'}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    style={loginStyles.input}
+                    required
+                  />
+                </div>
+                {isRegistering && (
+                  <div style={loginStyles.fieldGroup}>
+                    <label style={loginStyles.label}>Confirmer le mot de passe</label>
+                    <input
+                      type="password"
+                      autoComplete="new-password"
+                      placeholder="••••••••"
+                      value={confirmPassword}
+                      onChange={e => setConfirmPassword(e.target.value)}
+                      style={loginStyles.input}
+                      required
+                    />
+                  </div>
+                )}
+                <button type="submit" style={loginStyles.btn}>
+                  {isRegistering ? "S'inscrire" : 'Se connecter'}
+                </button>
+              </form>
             )}
-            <Button
+
+            <button
               onClick={() => {
                 setIsRegistering(!isRegistering);
                 setLoginError('');
@@ -505,13 +539,17 @@ function App() {
                 setPassword('');
                 setConfirmPassword('');
               }}
-              variant="link"
-              className="w-full text-slate-400"
+              style={loginStyles.switchBtn}
             >
               {isRegistering ? 'Déjà un compte ? Connectez-vous' : 'Pas de compte ? Inscrivez-vous'}
-            </Button>
-          </CardContent>
-        </Card>
+            </button>
+          </div>
+
+          <p style={loginStyles.footer}>Eyetech Construction © 2026 — Système interne BTP</p>
+        </div>
+
+        <div style={loginStyles.bgDot1} />
+        <div style={loginStyles.bgDot2} />
       </div>
     );
   }
@@ -793,4 +831,27 @@ function App() {
 }
 
 export default App;
+
+const loginStyles = {
+  root: { minHeight: '100vh', width: '100%', background: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden', fontFamily: "'Inter', system-ui, sans-serif" },
+  bgDot1: { position: 'absolute', top: '-200px', right: '-200px', width: '600px', height: '600px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(249,115,22,0.12) 0%, transparent 70%)', pointerEvents: 'none' },
+  bgDot2: { position: 'absolute', bottom: '-150px', left: '-150px', width: '500px', height: '500px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(249,115,22,0.07) 0%, transparent 70%)', pointerEvents: 'none' },
+  card: { width: '460px', background: '#1e293b', borderRadius: '16px', border: '1px solid #334155', padding: '40px', boxShadow: '0 25px 50px rgba(0,0,0,0.5)', position: 'relative', zIndex: 1 },
+  brandBlock: { display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '32px', paddingBottom: '24px', borderBottom: '1px solid #334155' },
+  logoCircle: { flexShrink: 0 },
+  brandName: { fontSize: '18px', fontWeight: '700', color: '#f1f5f9', margin: 0, lineHeight: '1.2' },
+  brandSub: { fontSize: '12px', color: '#64748b', marginTop: '3px', margin: '3px 0 0 0' },
+  formBlock: { marginBottom: '24px' },
+  title: { fontSize: '22px', fontWeight: '600', color: '#f1f5f9', marginBottom: '6px', marginTop: 0 },
+  subtitle: { fontSize: '13px', color: '#64748b', marginBottom: '24px', marginTop: 0 },
+  errorBox: { background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '8px', padding: '12px 16px', color: '#fca5a5', fontSize: '13px', marginBottom: '20px', display: 'flex', alignItems: 'flex-start' },
+  successBox: { background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: '8px', padding: '12px 16px', color: '#86efac', fontSize: '13px', marginBottom: '20px' },
+  form: { display: 'flex', flexDirection: 'column', gap: '18px' },
+  fieldGroup: { display: 'flex', flexDirection: 'column', gap: '6px' },
+  label: { fontSize: '13px', fontWeight: '500', color: '#94a3b8' },
+  input: { background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '10px 14px', color: '#f1f5f9', fontSize: '14px', outline: 'none', width: '100%', boxSizing: 'border-box' },
+  btn: { marginTop: '8px', background: '#f97316', color: '#fff', border: 'none', borderRadius: '8px', padding: '12px', fontSize: '15px', fontWeight: '600', cursor: 'pointer', width: '100%' },
+  switchBtn: { display: 'block', width: '100%', background: 'none', border: 'none', color: '#f97316', fontSize: '13px', cursor: 'pointer', marginTop: '16px', padding: '8px', textAlign: 'center', textDecoration: 'underline' },
+  footer: { textAlign: 'center', fontSize: '11px', color: '#475569', marginTop: '8px', marginBottom: 0 },
+};
 

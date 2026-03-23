@@ -1,0 +1,61 @@
+version: '3.8'
+services:
+  openrag-plomberie:
+    build: .
+    container_name: eyetech-rag-plomberie
+    ports:
+      - "3001:3000"
+    environment:
+      - OPENRAG_COLLECTION=plomberie
+      - OPENRAG_DESCRIPTION=Specialiste plomberie - DTU 60.1, NF EN 806
+    restart: unless-stopped
+
+  openrag-electricite:
+    build: .
+    container_name: eyetech-rag-electricite
+    ports:
+      - "3002:3000"
+    environment:
+      - OPENRAG_COLLECTION=electricite
+      - OPENRAG_DESCRIPTION=Specialiste electricite - NF C 15-100
+    restart: unless-stopped
+
+  openrag-placo:
+    build: .
+    container_name: eyetech-rag-placo
+    ports:
+      - "3003:3000"
+    environment:
+      - OPENRAG_COLLECTION=placo
+      - OPENRAG_DESCRIPTION=Specialiste placo - DTU 25.41
+    restart: unless-stopped
+
+  openrag-charpente:
+    build: .
+    container_name: eyetech-rag-charpente
+    ports:
+      - "3004:3000"
+    environment:
+      - OPENRAG_COLLECTION=charpente
+      - OPENRAG_DESCRIPTION=Specialiste charpente - DTU 31.1
+    restart: unless-stopped
+
+  openrag-cvc:
+    build: .
+    container_name: eyetech-rag-cvc
+    ports:
+      - "3005:3000"
+    environment:
+      - OPENRAG_COLLECTION=cvc
+      - OPENRAG_DESCRIPTION=Specialiste CVC - DTU 65.3
+    restart: unless-stopped
+
+  openrag-maconnerie:
+    build: .
+    container_name: eyetech-rag-maconnerie
+    ports:
+      - "3006:3000"
+    environment:
+      - OPENRAG_COLLECTION=maconnerie
+      - OPENRAG_DESCRIPTION=Specialiste maconnerie - DTU 20.1
+    restart: unless-stopped

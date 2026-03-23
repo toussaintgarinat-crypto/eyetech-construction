@@ -147,6 +147,37 @@ export default function NavBar() {
         ))}
       </nav>
 
+      {/* Suite Eyetech */}
+      <div style={{ padding: '0 0.75rem 0.5rem', fontSize: 10, color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: '0.5rem' }}>
+        Suite Eyetech
+      </div>
+      <div style={{ padding: '0 1rem 1rem', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+        {[
+          { label: 'Perce-Mur', short: 'PM', color: '#f97316', port: 5173 },
+          { label: 'BuildingScan', short: 'BS', color: '#7c3aed', port: 5172 },
+          { label: 'TradeLayer', short: 'TL', color: '#3b82f6', port: 5174 },
+          { label: 'ConstructOpt.', short: 'CO', color: '#10b981', port: 5175, current: true },
+        ].map(app => (
+          <a
+            key={app.label}
+            href={`http://localhost:${app.port}`}
+            title={app.label}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '5px',
+              padding: '4px 8px', borderRadius: '6px',
+              background: app.current ? 'rgba(16,185,129,0.15)' : 'transparent',
+              border: `1px solid ${app.current ? '#10b981' : '#334155'}`,
+              textDecoration: 'none', fontSize: '11px',
+              color: app.current ? '#10b981' : '#64748b',
+              fontWeight: app.current ? 700 : 400,
+            }}
+          >
+            <div style={{ width: 6, height: 6, borderRadius: '50%', background: app.color, flexShrink: 0 }} />
+            {app.short}
+          </a>
+        ))}
+      </div>
+
       {/* Logout */}
       <div style={{ padding: '1rem', borderTop: '1px solid #334155' }}>
         <button
