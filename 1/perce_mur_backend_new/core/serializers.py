@@ -22,7 +22,7 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data):
-        import os
+        import os, traceback as tb
         # SMTP complet = host + user + password tous définis
         smtp_ready = all([
             os.getenv('EMAIL_HOST_USER', ''),
@@ -30,13 +30,16 @@ class UserSerializer(serializers.ModelSerializer):
             os.getenv('EMAIL_HOST', ''),
         ])
         token = uuid.uuid4() if smtp_ready else None
-        user = User.objects.create_user(
-            username=validated_data.get("username", validated_data["email"]),
-            email=validated_data["email"],
-            password=validated_data["password"],
-            is_email_verified=True,  # toujours actif — email de confirmation si SMTP dispo
-            email_verification_token=token,
-        )
+        try:
+            user = User.objects.create_user(
+                username=validated_data.get("username", validated_data["email"]),
+                email=validated_data["email"],
+                password=validated_data["password"],
+                is_email_verified=True,
+                email_verification_token=token,
+            )
+        except Exception as e:
+            raise serializers.ValidationError({'create_user_error': str(e), 'trace': tb.format_exc()})
         if smtp_ready:
             try:
                 verify_url = f"{settings.BACKEND_URL}/api/verify-email/?token={token}"

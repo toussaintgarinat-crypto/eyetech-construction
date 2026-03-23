@@ -36,42 +36,46 @@ class RegisterSerializer(serializers.Serializer):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register_view(request):
-    serializer = RegisterSerializer(data=request.data)
-    if not serializer.is_valid():
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    data = serializer.validated_data
-    if User.objects.filter(username=data['username']).exists():
-        return Response({'erreur': 'Ce nom d\'utilisateur est déjà pris.'}, status=status.HTTP_400_BAD_REQUEST)
-    if User.objects.filter(email=data['email']).exists():
-        return Response({'erreur': 'Un compte existe déjà avec cet email.'}, status=status.HTTP_400_BAD_REQUEST)
-    smtp_ready = all([os.getenv('EMAIL_HOST_USER',''), os.getenv('EMAIL_HOST_PASSWORD',''), os.getenv('EMAIL_HOST','')])
-    user = User.objects.create_user(
-        username=data['username'],
-        email=data['email'],
-        password=data['password'],
-        is_active=True,
-    )
-    if smtp_ready:
-        try:
-            token = signing.dumps({'user_id': user.pk}, salt='constructoptimize-email-verification')
-            verify_url = f"{settings.BACKEND_URL}/api/auth/verify-email/?token={token}"
-            send_mail(
-                subject="Vérifiez votre email — ConstructOptimize",
-                message=(
-                    f"Bonjour {user.username},\n\n"
-                    f"Merci pour votre inscription sur ConstructOptimize.\n\n"
-                    f"Cliquez sur le lien ci-dessous pour activer votre compte :\n\n"
-                    f"{verify_url}\n\n"
-                    f"Ce lien est valable 24 heures.\n\n"
-                    f"L'équipe Eyetech Construction"
-                ),
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[user.email],
-                fail_silently=True,
-            )
-        except Exception:
-            pass
-    return Response({'message': 'Compte créé. Vous pouvez maintenant vous connecter.'}, status=status.HTTP_201_CREATED)
+    try:
+        serializer = RegisterSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        data = serializer.validated_data
+        if User.objects.filter(username=data['username']).exists():
+            return Response({'erreur': 'Ce nom d\'utilisateur est déjà pris.'}, status=status.HTTP_400_BAD_REQUEST)
+        if User.objects.filter(email=data['email']).exists():
+            return Response({'erreur': 'Un compte existe déjà avec cet email.'}, status=status.HTTP_400_BAD_REQUEST)
+        smtp_ready = all([os.getenv('EMAIL_HOST_USER',''), os.getenv('EMAIL_HOST_PASSWORD',''), os.getenv('EMAIL_HOST','')])
+        user = User.objects.create_user(
+            username=data['username'],
+            email=data['email'],
+            password=data['password'],
+            is_active=True,
+        )
+        if smtp_ready:
+            try:
+                token = signing.dumps({'user_id': user.pk}, salt='constructoptimize-email-verification')
+                verify_url = f"{settings.BACKEND_URL}/api/auth/verify-email/?token={token}"
+                send_mail(
+                    subject="Vérifiez votre email — ConstructOptimize",
+                    message=(
+                        f"Bonjour {user.username},\n\n"
+                        f"Merci pour votre inscription sur ConstructOptimize.\n\n"
+                        f"Cliquez sur le lien ci-dessous pour activer votre compte :\n\n"
+                        f"{verify_url}\n\n"
+                        f"Ce lien est valable 24 heures.\n\n"
+                        f"L'équipe Eyetech Construction"
+                    ),
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[user.email],
+                    fail_silently=True,
+                )
+            except Exception:
+                pass
+        return Response({'message': 'Compte créé. Vous pouvez maintenant vous connecter.'}, status=status.HTTP_201_CREATED)
+    except Exception as e:
+        import traceback
+        return Response({'erreur': str(e), 'detail': traceback.format_exc()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['GET'])
