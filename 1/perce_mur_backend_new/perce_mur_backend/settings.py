@@ -223,6 +223,10 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = True
 
 # Logging
+import os as _os
+_logs_dir = _os.path.join(BASE_DIR, 'logs')
+_os.makedirs(_logs_dir, exist_ok=True)
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

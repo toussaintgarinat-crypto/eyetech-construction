@@ -175,9 +175,34 @@ def test_register(request):
     except Exception as e:
         return HealthResponse({"ok": False, "error": str(e), "trace": traceback.format_exc()}, status=500)
 
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+import json
+
+@csrf_exempt
+@require_POST
+def raw_test_register(request):
+    """Vue Django pure (sans DRF) pour isoler le problème."""
+    import traceback
+    try:
+        body = json.loads(request.body)
+        from django.contrib.auth.models import User as DjangoUser
+        username = body.get("username", "rawtest")
+        email = body.get("email", "rawtest@test.com")
+        password = body.get("password", "TestPass123")
+        if DjangoUser.objects.filter(username=username).exists():
+            return JsonResponse({"ok": False, "reason": "exists"})
+        u = DjangoUser.objects.create_user(username=username, email=email, password=password, is_active=True)
+        return JsonResponse({"ok": True, "id": u.pk, "username": u.username})
+    except Exception as e:
+        return JsonResponse({"ok": False, "error": str(e), "trace": traceback.format_exc()}, status=500)
+
 urlpatterns = [
     path("health/", health_check, name="health"),
     path("api/test-register/", test_register, name="test_register"),
+    path("api/raw-register/", raw_test_register, name="raw_register"),
     path('admin/', admin.site.urls),
     path('api/token/', ThrottledTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
