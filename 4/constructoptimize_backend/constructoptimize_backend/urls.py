@@ -4,7 +4,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.core import signing
 from django.core.mail import send_mail
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from rest_framework_simplejwt.views import TokenRefreshView, TokenBlacklistView
 from rest_framework_simplejwt.views import TokenObtainPairView
 from constructoptimize_backend.logout_view import LogoutView
@@ -33,25 +33,34 @@ class RegisterSerializer(serializers.Serializer):
         return attrs
 
 
-@api_view(['POST'])
-@permission_classes([AllowAny])
+from django.views.decorators.csrf import csrf_exempt as _csrf_exempt
+
+@_csrf_exempt
 def register_view(request):
+    import json as _json, traceback as _tb
+    if request.method != 'POST':
+        return JsonResponse({'erreur': 'Méthode non autorisée.'}, status=405)
     try:
-        serializer = RegisterSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        data = serializer.validated_data
-        if User.objects.filter(username=data['username']).exists():
-            return Response({'erreur': 'Ce nom d\'utilisateur est déjà pris.'}, status=status.HTTP_400_BAD_REQUEST)
-        if User.objects.filter(email=data['email']).exists():
-            return Response({'erreur': 'Un compte existe déjà avec cet email.'}, status=status.HTTP_400_BAD_REQUEST)
-        smtp_ready = all([os.getenv('EMAIL_HOST_USER',''), os.getenv('EMAIL_HOST_PASSWORD',''), os.getenv('EMAIL_HOST','')])
-        user = User.objects.create_user(
-            username=data['username'],
-            email=data['email'],
-            password=data['password'],
-            is_active=True,
-        )
+        try:
+            body = _json.loads(request.body)
+        except Exception:
+            body = {}
+        username = str(body.get('username', '')).strip()
+        email = str(body.get('email', '')).strip()
+        password = str(body.get('password', ''))
+        password2 = str(body.get('password2', ''))
+        if not username or not email or not password:
+            return JsonResponse({'erreur': 'username, email et password sont requis.'}, status=400)
+        if len(password) < 8:
+            return JsonResponse({'erreur': 'Le mot de passe doit contenir au moins 8 caractères.'}, status=400)
+        if password2 and password != password2:
+            return JsonResponse({'erreur': 'Les mots de passe ne correspondent pas.'}, status=400)
+        if User.objects.filter(username=username).exists():
+            return JsonResponse({'erreur': "Ce nom d'utilisateur est déjà pris."}, status=400)
+        if User.objects.filter(email=email).exists():
+            return JsonResponse({'erreur': 'Un compte existe déjà avec cet email.'}, status=400)
+        user = User.objects.create_user(username=username, email=email, password=password, is_active=True)
+        smtp_ready = all([os.getenv('EMAIL_HOST_USER', ''), os.getenv('EMAIL_HOST_PASSWORD', ''), os.getenv('EMAIL_HOST', '')])
         if smtp_ready:
             try:
                 token = signing.dumps({'user_id': user.pk}, salt='constructoptimize-email-verification')
@@ -72,10 +81,9 @@ def register_view(request):
                 )
             except Exception:
                 pass
-        return Response({'message': 'Compte créé. Vous pouvez maintenant vous connecter.'}, status=status.HTTP_201_CREATED)
+        return JsonResponse({'message': 'Compte créé. Vous pouvez maintenant vous connecter.'}, status=201)
     except Exception as e:
-        import traceback
-        return Response({'erreur': str(e), 'detail': traceback.format_exc()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return JsonResponse({'erreur': str(e), 'detail': _tb.format_exc()}, status=500)
 
 
 @api_view(['GET'])
