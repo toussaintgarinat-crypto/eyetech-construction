@@ -59,28 +59,7 @@ def register_view(request):
             return JsonResponse({'erreur': "Ce nom d'utilisateur est déjà pris."}, status=400)
         if User.objects.filter(email=email).exists():
             return JsonResponse({'erreur': 'Un compte existe déjà avec cet email.'}, status=400)
-        user = User.objects.create_user(username=username, email=email, password=password, is_active=True)
-        smtp_ready = all([os.getenv('EMAIL_HOST_USER', ''), os.getenv('EMAIL_HOST_PASSWORD', ''), os.getenv('EMAIL_HOST', '')])
-        if smtp_ready:
-            try:
-                token = signing.dumps({'user_id': user.pk}, salt='constructoptimize-email-verification')
-                verify_url = f"{settings.BACKEND_URL}/api/auth/verify-email/?token={token}"
-                send_mail(
-                    subject="Vérifiez votre email — ConstructOptimize",
-                    message=(
-                        f"Bonjour {user.username},\n\n"
-                        f"Merci pour votre inscription sur ConstructOptimize.\n\n"
-                        f"Cliquez sur le lien ci-dessous pour activer votre compte :\n\n"
-                        f"{verify_url}\n\n"
-                        f"Ce lien est valable 24 heures.\n\n"
-                        f"L'équipe Eyetech Construction"
-                    ),
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[user.email],
-                    fail_silently=True,
-                )
-            except Exception:
-                pass
+        User.objects.create_user(username=username, email=email, password=password, is_active=True)
         return JsonResponse({'message': 'Compte créé. Vous pouvez maintenant vous connecter.'}, status=201)
     except Exception as e:
         return JsonResponse({'erreur': str(e), 'detail': _tb.format_exc()}, status=500)
