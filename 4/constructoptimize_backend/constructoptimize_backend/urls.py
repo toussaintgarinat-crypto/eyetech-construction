@@ -157,8 +157,27 @@ from rest_framework.response import Response as HealthResponse
 def health_check(request):
     return HealthResponse({"status": "ok", "app": "constructoptimize"})
 
+
+@api_view(["POST"])
+@dpc3([AllowAny])
+def test_register(request):
+    """Endpoint de debug temporaire — crée un utilisateur minimal."""
+    from django.contrib.auth.models import User as DjangoUser
+    import traceback
+    try:
+        username = request.data.get("username", "testminimal")
+        email = request.data.get("email", "testminimal@test.com")
+        password = request.data.get("password", "TestPass123")
+        if DjangoUser.objects.filter(username=username).exists():
+            return HealthResponse({"ok": False, "reason": "exists"})
+        u = DjangoUser.objects.create_user(username=username, email=email, password=password, is_active=True)
+        return HealthResponse({"ok": True, "id": u.pk, "username": u.username})
+    except Exception as e:
+        return HealthResponse({"ok": False, "error": str(e), "trace": traceback.format_exc()}, status=500)
+
 urlpatterns = [
     path("health/", health_check, name="health"),
+    path("api/test-register/", test_register, name="test_register"),
     path('admin/', admin.site.urls),
     path('api/token/', ThrottledTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
