@@ -142,7 +142,12 @@ export default function MesuresPage() {
               </thead>
               <tbody>
                 {filteredMesures.map(m => (
-                  <tr key={m.id} style={styles.tr}>
+                  <tr
+                    key={m.id}
+                    style={styles.tr}
+                    onMouseEnter={e => (e.currentTarget.style.background = '#253347')}
+                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                  >
                     <td style={styles.td}><TypeMesureBadge type={m.type_mesure} /></td>
                     <td style={styles.td}>
                       <span style={styles.valueText}>{m.valeur} {m.unite || 'm'}</span>

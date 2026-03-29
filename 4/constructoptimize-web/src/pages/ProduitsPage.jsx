@@ -188,8 +188,8 @@ export default function ProduitsPage() {
                 gap: '0.75rem',
                 transition: 'border-color 0.15s',
               }}
-              onMouseEnter={e => (e.currentTarget.style.borderColor = '#334155')}
-              onMouseLeave={e => (e.currentTarget.style.borderColor = '#334155')}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = '#10b981'; e.currentTarget.style.background = '#253347' }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = '#334155'; e.currentTarget.style.background = '#1e293b' }}
             >
               {/* Icone + categorie */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -271,6 +271,7 @@ export default function ProduitsPage() {
                   justifyContent: 'center',
                   gap: '0.4rem',
                   marginTop: 'auto',
+                  cursor: 'pointer',
                 }}
                 onMouseEnter={e => (e.currentTarget.style.background = 'rgba(16,185,129,0.25)')}
                 onMouseLeave={e => (e.currentTarget.style.background = 'rgba(16,185,129,0.12)')}

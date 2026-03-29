@@ -106,7 +106,7 @@ function App() {
   const fetchProjects = async () => {
     try {
       const response = await getProjects();
-      setProjects(response.data);
+      setProjects(Array.isArray(response.data) ? response.data : (response.data.results || []));
     } catch (error) {
       console.error('Erreur lors du chargement des projets:', error);
       if (error.response && error.response.status === 401) {
@@ -120,7 +120,7 @@ function App() {
   const fetchDrillingPoints = async (projectId) => {
     try {
       const response = await getDrillingPoints(projectId);
-      setDrillingPoints(response.data);
+      setDrillingPoints(Array.isArray(response.data) ? response.data : (response.data.results || []));
     } catch (error) {
       console.error('Erreur lors du chargement des points de perçage:', error);
     }
@@ -129,7 +129,7 @@ function App() {
   const fetchARMeasurements = async (projectId) => {
     try {
       const response = await getARMeasurements(projectId);
-      setARMeasurements(response.data);
+      setARMeasurements(Array.isArray(response.data) ? response.data : (response.data.results || []));
     } catch (error) {
       console.error('Erreur lors du chargement des mesures AR:', error);
     }

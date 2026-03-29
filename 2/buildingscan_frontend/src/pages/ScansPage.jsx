@@ -169,7 +169,13 @@ export default function ScansPage() {
       ) : (
         <div style={styles.grid}>
           {filtered.map(scan => (
-            <Link key={scan.id} to={`/scans/${scan.id}`} style={styles.card}>
+            <Link
+              key={scan.id}
+              to={`/scans/${scan.id}`}
+              style={styles.card}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = ACCENT; e.currentTarget.style.background = '#253347' }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = '#334155'; e.currentTarget.style.background = '#1e293b' }}
+            >
               <div style={styles.cardHeader}>
                 <div style={styles.cardIcon}>🏗</div>
                 <StatutBadge statut={scan.statut} />
@@ -274,7 +280,7 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingTop: '10px',
-    borderTop: '1px solid #1e293b',
+    borderTop: '1px solid #334155',
     marginTop: 'auto',
   },
   cardMeta: { fontSize: '12px', color: '#475569' },

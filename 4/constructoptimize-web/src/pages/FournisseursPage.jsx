@@ -150,6 +150,7 @@ export default function FournisseursPage() {
             display: 'flex',
             alignItems: 'center',
             gap: '0.5rem',
+            cursor: geoLoading ? 'not-allowed' : 'pointer',
           }}
         >
           <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -322,6 +323,7 @@ export default function FournisseursPage() {
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '0.4rem',
+                  cursor: 'pointer',
                 }}
                 onMouseEnter={e => (e.currentTarget.style.background = 'rgba(16,185,129,0.25)')}
                 onMouseLeave={e => (e.currentTarget.style.background = 'rgba(16,185,129,0.12)')}

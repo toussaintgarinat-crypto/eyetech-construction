@@ -229,6 +229,7 @@ export default function RecherchePage() {
               alignItems: 'center',
               gap: '0.5rem',
               opacity: loading ? 0.7 : 1,
+              cursor: loading ? 'not-allowed' : 'pointer',
             }}
             onMouseEnter={e => !loading && (e.currentTarget.style.background = '#059669')}
             onMouseLeave={e => !loading && (e.currentTarget.style.background = '#10b981')}

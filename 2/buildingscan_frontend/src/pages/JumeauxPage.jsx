@@ -110,7 +110,12 @@ export default function JumeauxPage() {
           {filtered.map(j => {
             const fmt = FORMATS[j.format_modele] || { color: '#64748b' }
             return (
-              <div key={j.id} style={styles.card}>
+              <div
+                key={j.id}
+                style={styles.card}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = fmt.color; e.currentTarget.style.background = '#253347' }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = '#334155'; e.currentTarget.style.background = '#1e293b' }}
+              >
                 {/* Card header */}
                 <div style={styles.cardHeader}>
                   <div style={{ ...styles.cardFormatBadge, color: fmt.color, borderColor: fmt.color + '44', background: fmt.color + '22' }}>
@@ -249,6 +254,7 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     gap: '14px',
+    transition: 'border-color 0.15s, background 0.15s',
   },
   cardHeader: {
     display: 'flex',

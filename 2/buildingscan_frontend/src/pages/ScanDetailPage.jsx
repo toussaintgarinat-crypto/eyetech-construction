@@ -172,7 +172,12 @@ export default function ScanDetailPage() {
               </thead>
               <tbody>
                 {fichiers.map(f => (
-                  <tr key={f.id} style={styles.tr}>
+                  <tr
+                    key={f.id}
+                    style={styles.tr}
+                    onMouseEnter={e => (e.currentTarget.style.background = '#253347')}
+                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                  >
                     <td style={styles.td}>
                       <span style={styles.fileIcon}>📄</span>
                       {f.nom_fichier}
@@ -417,7 +422,7 @@ const styles = {
     whiteSpace: 'nowrap',
   },
   tr: {
-    borderBottom: '1px solid #1e293b',
+    borderBottom: '1px solid rgba(51,65,85,0.5)',
   },
   td: {
     padding: '12px 16px',

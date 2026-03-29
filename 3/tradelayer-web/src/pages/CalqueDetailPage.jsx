@@ -179,7 +179,6 @@ export default function CalqueDetailPage() {
             {calque.description && <p style={styles.desc}>{calque.description}</p>}
           </div>
         </div>
-      </div>
 
       {/* Info cards */}
       <div style={styles.infoGrid}>
@@ -266,7 +265,12 @@ export default function CalqueDetailPage() {
                   : '—'
 
                 return (
-                  <tr key={el.id} style={idx % 2 === 0 ? styles.trEven : styles.trOdd}>
+                  <tr
+                    key={el.id}
+                    style={idx % 2 === 0 ? styles.trEven : styles.trOdd}
+                    onMouseEnter={e => (e.currentTarget.style.background = '#253347')}
+                    onMouseLeave={e => (e.currentTarget.style.background = idx % 2 === 0 ? '#0f172a' : '#111827')}
+                  >
                     <td style={styles.td}>{idx + 1}</td>
                     <td style={styles.td}>
                       <span style={styles.typeCell}>

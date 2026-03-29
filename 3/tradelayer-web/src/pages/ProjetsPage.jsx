@@ -169,7 +169,13 @@ export default function ProjetsPage() {
       ) : (
         <div style={styles.grid}>
           {filtered.map(projet => (
-            <Link key={projet.id} to={`/projets/${projet.id}`} style={styles.card}>
+            <Link
+              key={projet.id}
+              to={`/projets/${projet.id}`}
+              style={styles.card}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = '#3b82f6'; e.currentTarget.style.background = '#253347' }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = '#334155'; e.currentTarget.style.background = '#1e293b' }}
+            >
               <div style={styles.cardHeader}>
                 <div style={styles.cardIcon}>🏗</div>
                 <StatutBadge statut={projet.statut} />
@@ -272,7 +278,7 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingTop: '10px',
-    borderTop: '1px solid #1e293b',
+    borderTop: '1px solid #334155',
     marginTop: 'auto',
   },
   cardMeta: { fontSize: '12px', color: '#475569' },

@@ -284,7 +284,13 @@ export default function ProjetDetailPage() {
             const cmNom = getCorpsMetierNom(calque.corps_metier)
             const color = getCorpsColor(cmNom)
             return (
-              <Link key={calque.id} to={`/calques/${calque.id}`} style={{ ...styles.calqueCard, borderLeftColor: color }}>
+              <Link
+                key={calque.id}
+                to={`/calques/${calque.id}`}
+                style={{ ...styles.calqueCard, borderLeftColor: color }}
+                onMouseEnter={e => (e.currentTarget.style.background = '#253347')}
+                onMouseLeave={e => (e.currentTarget.style.background = '#1e293b')}
+              >
                 <div style={styles.calqueTop}>
                   <div style={styles.calqueLeft}>
                     <div style={{ ...styles.calqueColorDot, background: color }} />
