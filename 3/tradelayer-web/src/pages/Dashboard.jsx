@@ -152,6 +152,8 @@ export default function Dashboard() {
       <div style={styles.quickGrid}>
         <QuickAction icon="📋" label="Mes projets" to="/projets" color="#3b82f6" />
         <QuickAction icon="🗂" label="Tous les calques" to="/projets" color="#8b5cf6" />
+        <QuickAction icon="🏗" label="Aide & FAQ" to="/aide" color="#10b981" />
+        <QuickAction icon="📖" label="Tutoriel" to="/tutoriel" color="#f59e0b" />
       </div>
 
       {/* Corps métier legend */}

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import api from '../api'
 import CorpsMetierBadge from '../components/CorpsMetierBadge'
@@ -37,6 +37,9 @@ export default function CalqueDetailPage() {
   const [elements, setElements] = useState([])
   const [loading, setLoading] = useState(true)
   const [corpsMetier, setCorpsMetier] = useState(null)
+  const [statutChanging, setStatutChanging] = useState(false)
+  const [showStatutMenu, setShowStatutMenu] = useState(false)
+  const statutMenuRef = useRef(null)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -69,6 +72,19 @@ export default function CalqueDetailPage() {
     }
     fetchData()
   }, [id])
+
+  const changeStatut = async (newStatut) => {
+    setStatutChanging(true)
+    setShowStatutMenu(false)
+    try {
+      const res = await api.patch(`/api/calques-metiers/api/calques/${id}/`, { statut: newStatut })
+      setCalque(res.data)
+    } catch (e) {
+      console.error('Erreur changement statut:', e)
+    } finally {
+      setStatutChanging(false)
+    }
+  }
 
   if (loading) return <div style={styles.loading}>Chargement du calque...</div>
   if (!calque) return <div style={styles.loading}>Calque introuvable.</div>
@@ -107,19 +123,61 @@ export default function CalqueDetailPage() {
 
       {/* Header */}
       <div style={styles.pageHeader}>
-        <div>
+        <div style={{ flex: 1 }}>
           <div style={styles.titleRow}>
             <h1 style={styles.title}>{calque.nom}</h1>
-            <span style={{
-              fontSize: '12px', fontWeight: '600', color: statutColor,
-              background: statutColor + '22', border: `1px solid ${statutColor}44`,
-              borderRadius: '20px', padding: '4px 12px',
-            }}>
-              {calque.statut || 'Inconnu'}
-            </span>
+            {/* Statut + dropdown pour changer */}
+            <div style={{ position: 'relative' }} ref={statutMenuRef}>
+              <button
+                onClick={() => setShowStatutMenu(v => !v)}
+                disabled={statutChanging}
+                style={{
+                  fontSize: '12px', fontWeight: '600', color: statutColor,
+                  background: statutColor + '22', border: `1px solid ${statutColor}44`,
+                  borderRadius: '20px', padding: '4px 12px',
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
+                }}
+              >
+                {statutChanging ? '...' : (calque.statut || 'Inconnu')}
+                <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </button>
+              {showStatutMenu && (
+                <div style={{
+                  position: 'absolute', top: '100%', left: 0, zIndex: 200,
+                  background: '#1e293b', border: '1px solid #334155', borderRadius: '10px',
+                  padding: '6px', marginTop: '4px', minWidth: '160px',
+                  boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+                }}>
+                  {[
+                    { val: 'brouillon', label: 'Brouillon', color: '#f59e0b', icon: '✏️' },
+                    { val: 'actif', label: 'Actif (AR visible)', color: '#10b981', icon: '✅' },
+                    { val: 'archive', label: 'Archiver', color: '#64748b', icon: '📦' },
+                  ].filter(s => s.val !== calque.statut && s.val !== 'archivé').map(s => (
+                    <button
+                      key={s.val}
+                      onClick={() => changeStatut(s.val)}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: '8px',
+                        width: '100%', padding: '8px 12px', borderRadius: '7px',
+                        background: 'transparent', border: 'none',
+                        color: s.color, fontSize: '13px', fontWeight: '500',
+                        cursor: 'pointer', textAlign: 'left',
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.background = '#334155'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                    >
+                      <span>{s.icon}</span> {s.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-          {cmNom && <div style={{ marginTop: '8px' }}><CorpsMetierBadge nom={cmNom} /></div>}
-          {calque.description && <p style={styles.desc}>{calque.description}</p>}
+            {cmNom && <div style={{ marginTop: '8px' }}><CorpsMetierBadge nom={cmNom} /></div>}
+            {calque.description && <p style={styles.desc}>{calque.description}</p>}
+          </div>
         </div>
       </div>
 

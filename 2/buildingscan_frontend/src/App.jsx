@@ -6,6 +6,7 @@ import ScanDetailPage from './pages/ScanDetailPage'
 import MesuresPage from './pages/MesuresPage'
 import JumeauxPage from './pages/JumeauxPage'
 import TutorielPage from './pages/TutorielPage'
+import AidePage from './pages/AidePage'
 import NavBar from './components/NavBar'
 
 function PrivateLayout({ children }) {
@@ -32,6 +33,7 @@ export default function App() {
         <Route path="/mesures" element={<PrivateLayout><MesuresPage /></PrivateLayout>} />
         <Route path="/jumeaux" element={<PrivateLayout><JumeauxPage /></PrivateLayout>} />
         <Route path="/tutoriel" element={<PrivateLayout><TutorielPage /></PrivateLayout>} />
+        <Route path="/aide" element={<PrivateLayout><AidePage /></PrivateLayout>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

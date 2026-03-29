@@ -171,16 +171,45 @@ export default function Dashboard() {
           sub="vs. prix marche moyen"
         />
         <StatCard
-          label="Derniere recherche"
-          value={recherches.length > 0 ? '1' : '0'}
+          label="Recherches effectuees"
+          value={loading ? '...' : stats.recherches}
           icon="🕐"
           color="#8b5cf6"
           sub={
             recherches.length > 0
-              ? `"${recherches[0].materiau || recherches[0].terme || 'N/A'}"`
+              ? `Derniere : "${recherches[0].terme_recherche || 'N/A'}"`
               : 'Aucune recherche'
           }
         />
+      </div>
+
+      {/* Raccourcis materiaux courants */}
+      <div style={{ marginBottom: '2rem' }}>
+        <div style={{ fontSize: 13, fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>
+          Matériaux fréquents
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+          {['Placo BA13', 'Câble électrique 2.5mm²', 'Tube PER plomberie', 'Laine de verre isolation', 'Mortier colle', 'Rail montant 70mm', 'Béton prêt emploi'].map(mat => (
+            <button
+              key={mat}
+              onClick={() => navigate(`/recherche?q=${encodeURIComponent(mat)}`)}
+              style={{
+                padding: '0.4rem 0.9rem',
+                background: '#1e293b',
+                border: '1px solid #334155',
+                borderRadius: 20,
+                color: '#94a3b8',
+                fontSize: 13,
+                cursor: 'pointer',
+                transition: 'all 0.15s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = '#10b981'; e.currentTarget.style.color = '#10b981' }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = '#334155'; e.currentTarget.style.color = '#94a3b8' }}
+            >
+              {mat}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Recherches recentes */}
@@ -265,32 +294,34 @@ export default function Dashboard() {
                   </div>
                   <div>
                     <div style={{ fontSize: 14, fontWeight: 500, color: '#e2e8f0' }}>
-                      {r.materiau || r.terme || r.query || `Recherche #${r.id}`}
+                      {r.terme_recherche || `Recherche #${String(r.id).slice(0, 8)}`}
                     </div>
-                    {r.adresse_chantier && (
-                      <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
-                        Chantier : {r.adresse_chantier}
-                      </div>
-                    )}
+                    <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
+                      {r.nombre_resultats != null ? `${r.nombre_resultats} résultat(s)` : ''}
+                      {r.rayon_recherche ? ` — rayon ${r.rayon_recherche}km` : ''}
+                    </div>
                   </div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  {r.rayon_km && (
+                  {r.statut && (
                     <div
                       style={{
-                        fontSize: 12,
-                        background: 'rgba(16,185,129,0.12)',
-                        color: '#10b981',
+                        fontSize: 11,
+                        background: r.statut === 'terminee' ? 'rgba(16,185,129,0.12)' : 'rgba(245,158,11,0.12)',
+                        color: r.statut === 'terminee' ? '#10b981' : '#f59e0b',
                         padding: '0.2rem 0.6rem',
                         borderRadius: 6,
+                        textTransform: 'uppercase',
+                        fontWeight: 600,
+                        letterSpacing: '0.05em',
                       }}
                     >
-                      {r.rayon_km} km
+                      {r.statut === 'terminee' ? 'Terminée' : r.statut}
                     </div>
                   )}
-                  {r.created_at && (
+                  {r.date_creation && (
                     <div style={{ fontSize: 11, color: '#475569', marginTop: 3 }}>
-                      {new Date(r.created_at).toLocaleDateString('fr-FR')}
+                      {new Date(r.date_creation).toLocaleDateString('fr-FR')}
                     </div>
                   )}
                 </div>
